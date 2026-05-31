@@ -20,6 +20,8 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "@aws-sdk/client-bedrock-runtime": "^3.1057.0",
+    "dotenv": "^17.4.2",
+    "zod": "^4.4.3"
   }
 }
