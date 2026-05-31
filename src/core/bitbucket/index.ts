@@ -1,6 +1,6 @@
 import { config } from "@/config";
 import { createHttpClient } from "../http/axios";
-import { GetPipelineResponse, ListPipelinesResponse, Paginated } from "./types";
+import { GetPipelineResponse, ListPipelinesResponse } from "./types";
 import { UUID } from "crypto";
 
 const client = createHttpClient({

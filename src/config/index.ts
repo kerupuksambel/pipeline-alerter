@@ -24,6 +24,9 @@ const schema = z
     // Bedrock
     AWS_BEARER_TOKEN_BEDROCK: z.string().optional(),
     AWS_REGION: z.string().optional(),
+
+    // DB
+    DB_FILENAME: z.string().default("database.db"),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === "openai" && !env.OPENAI_API_TOKEN) {
