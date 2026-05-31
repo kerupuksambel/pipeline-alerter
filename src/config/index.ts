@@ -19,7 +19,7 @@ const schema = z
 
     // OpenAI
     OPENAI_API_TOKEN: z.string().optional(),
-    OPENAI_BASE_URL: z.url("OPENAI_BASE_URL must be a valid URL").optional(),
+    OPENAI_BASE_URL: z.string().optional(),
 
     // Bedrock
     AWS_BEARER_TOKEN_BEDROCK: z.string().optional(),
@@ -57,7 +57,7 @@ const parsed = schema.safeParse(process.env);
 
 if (!parsed.success) {
   Log.error(
-    `[CONFIG] Error on environment parsing. Error: ${z.treeifyError(parsed.error)}`,
+    `[CONFIG] Error on environment parsing. Error: ${JSON.stringify(z.treeifyError(parsed.error))}`,
   );
   process.exit(1);
 }
