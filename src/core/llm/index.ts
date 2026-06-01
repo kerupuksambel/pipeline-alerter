@@ -27,7 +27,7 @@ export const analyzePipelineLog = async (
     Your analysis must be :
     1. Concise, no fluff, no unnecessary words. Only your analysis, consisted of what happened, and what's your call to check.
     2. Formatted in HTML, but only including <b>, <i>, <a> if you want to include references, and <code> for the codeblock.
-    3. Use \\n if you want to make a new line
+    3. Use \n if you want to make a new line
     3. Keep it below 2,000 characters (including the HTML tags)
   `;
 
