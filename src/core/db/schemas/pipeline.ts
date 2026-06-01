@@ -1,16 +1,18 @@
-import {
-  sqliteTable,
-  text,
-  integer,
-  primaryKey,
-} from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import type {
+  PipelineResultName,
+  PipelineState,
+} from "@/core/bitbucket/types";
 
-export const Pipeline = sqliteTable(
-  "pipelines",
-  {
-    id: text("id").notNull(),
-    status: text("status").notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-  },
-  (t) => [primaryKey({ columns: [t.id, t.status] })],
-);
+/** Lifecycle state name: "PENDING" | "IN_PROGRESS" | "COMPLETED". */
+type PipelineStateName = PipelineState["name"];
+
+export const Pipeline = sqliteTable("pipelines", {
+  id: text("id").primaryKey(),
+  pipelineStatus: text("pipeline_status")
+    .$type<PipelineStateName>()
+    .notNull(),
+  // Only meaningful once pipelineStatus is "COMPLETED"; null otherwise.
+  resultStatus: text("result_status").$type<PipelineResultName>(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
