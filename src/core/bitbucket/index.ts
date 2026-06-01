@@ -14,7 +14,7 @@ const client = createHttpClient({
 
 export const getPipelinesList = async () => {
   const response = await client.get<ListPipelinesResponse>(
-    `repositories/${config.BB_WORKSPACE}/${config.BB_REPO}/pipelines/`,
+    `repositories/${config.BB_WORKSPACE}/${config.BB_REPO}/pipelines/?sort=-created_on&pagelen=20`,
   );
 
   return response.data;

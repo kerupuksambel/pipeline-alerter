@@ -93,6 +93,8 @@ export interface BitbucketPipeline {
   target: PipelineTarget;
   trigger: PipelineTrigger;
   state: PipelineState;
+  created_on: string; // ISO-8601 timestamp — when the pipeline was executed
+  completed_on?: string; // ISO-8601 timestamp — present once the pipeline finishes
 }
 
 // ---------- Response types --------------------------------------------------

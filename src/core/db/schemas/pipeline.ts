@@ -14,5 +14,6 @@ export const Pipeline = sqliteTable("pipelines", {
     .notNull(),
   // Only meaningful once pipelineStatus is "COMPLETED"; null otherwise.
   resultStatus: text("result_status").$type<PipelineResultName>(),
+  executedAt: integer("executed_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });

@@ -19,12 +19,14 @@ const main = async () => {
   const existedPipelineIDs = existedPipelines.map((pl) => pl.id);
   pipelines.values.forEach(async (pl) => {
     if (!existedPipelineIDs.includes(pl.uuid)) {
+      Log.info(`Adding entry to pipeline ID: ${pl.uuid}`);
       await addPipeline({
         id: pl.uuid,
         pipelineStatus: pl.state.name,
         resultStatus:
           pl.state.name === "COMPLETED" ? pl.state.result.name : null,
         updatedAt: new Date(),
+        executedAt: new Date(pl.created_on),
       });
     }
   });

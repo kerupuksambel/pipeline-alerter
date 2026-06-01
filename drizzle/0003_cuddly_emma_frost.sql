@@ -1,0 +1,1 @@
+ALTER TABLE `pipelines` ADD `executed_at` integer NOT NULL;
