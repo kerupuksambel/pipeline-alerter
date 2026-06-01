@@ -1,12 +1,22 @@
-import { getPipelineDetail, getPipelinesList } from "./core/bitbucket";
+import {
+  getPipelineDetail,
+  getPipelinesList,
+  getPipelineStepLog,
+  getPipelineSteps,
+} from "./core/bitbucket";
 import type { PipelineResultName, PipelineState } from "./core/bitbucket/types";
-import { getBranchName, isCompleted } from "./core/bitbucket/util";
+import {
+  getBranchName,
+  getFailedSteps,
+  isCompleted,
+} from "./core/bitbucket/util";
 import {
   addPipeline,
   getPipeline,
   getPipelinesByIds,
   updatePipelineState,
 } from "./core/db/repositories/pipeline";
+import { analyzePipelineLog } from "./core/llm";
 import { teleBot } from "./core/telebot";
 import { Timer } from "./core/timer";
 import { removeBrackets } from "./utils/formatter";
@@ -61,8 +71,28 @@ const trackPipeline = (uuid: string): void => {
           teleBot.broadcastMessages(
             nextResult === "SUCCESSFUL"
               ? `✅ Pipeline with ID: <b>${removeBrackets(uuid)}</b> sourced from branch <b>${getBranchName(detail.target)}</b> has been finished at ${detail.completed_on}`
-              : `🛑 Pipeline with ID: <b>${removeBrackets(uuid)}</b> sourced from branch <b>${getBranchName(detail.target)}</b> has been stopped at ${detail.completed_on} with the status ${nextResult}`,
+              : `
+                🛑 Pipeline with ID: <b>${removeBrackets(uuid)}</b> sourced from branch <b>${getBranchName(detail.target)}</b> has been stopped at ${detail.completed_on} with the status ${nextResult}
+                ${nextResult === "FAILED" || nextResult === "ERROR" ? `\n\n🧠 Analyzing the failing steps...` : ""}
+                `,
           );
+
+          if (nextResult === "FAILED" || nextResult === "ERROR") {
+            const pipelineSteps = await getPipelineSteps(uuid);
+            // get failed steps
+            const failedSteps = getFailedSteps(pipelineSteps.values);
+
+            const failedLogs = await Promise.all(
+              failedSteps.map((step) => getPipelineStepLog(uuid, step.uuid)),
+            );
+
+            const failureAnalysis = await analyzePipelineLog(
+              failedSteps,
+              failedLogs,
+            );
+
+            teleBot.broadcastMessages(failureAnalysis);
+          }
         }
 
         await updatePipelineState(uuid, nextStatus, nextResult);
@@ -93,9 +123,7 @@ const discover = async (): Promise<void> => {
   for (const pl of pipelines) {
     if (!knownIds.has(pl.uuid)) {
       Log.info(`[discover] new pipeline ${pl.uuid} (${pl.state.name})`);
-      await teleBot.broadcastMessages(
-        `⚙️ A new pipeline with ID: <b>${removeBrackets(pl.uuid)}</b> sourced from branch <b>${getBranchName(pl.target)}</b> has been started at ${pl.created_on}`,
-      );
+
       await addPipeline({
         id: pl.uuid,
         pipelineStatus: pl.state.name,
@@ -108,12 +136,43 @@ const discover = async (): Promise<void> => {
     if (!isDone(pl.state)) {
       trackPipeline(pl.uuid);
     }
+
+    if (!knownIds.has(pl.uuid) && !isDone(pl.state)) {
+      await teleBot.broadcastMessages(
+        `⚙️ A new pipeline with ID: <b>${removeBrackets(pl.uuid)}</b> sourced from branch <b>${getBranchName(pl.target)}</b> has been started at ${pl.created_on}`,
+      );
+    }
+  }
+};
+
+/**
+ * DEBUG: prints the first step's log of the first pipeline at startup, to
+ * sanity-check the steps/logs fetch path. Fail-soft — never crashes startup.
+ */
+const debugFirstStepLog = async (): Promise<void> => {
+  try {
+    const { values: pipelines } = await getPipelinesList();
+    const pipeline = pipelines[0];
+    if (!pipeline) return void Log.warning("[debug] no pipelines found");
+
+    const { values: steps } = await getPipelineSteps(pipeline.uuid);
+    const step = steps[0];
+    if (!step) return void Log.warning(`[debug] no steps for ${pipeline.uuid}`);
+
+    const log = await getPipelineStepLog(pipeline.uuid, step.uuid);
+    Log.debug(
+      `[debug] first step log of ${pipeline.uuid} / ${step.uuid}:\n${log}`,
+    );
+  } catch (err) {
+    Log.error(`[debug] failed to fetch first step log: ${err}`);
   }
 };
 
 const main = async () => {
   Log.info("Starting pipeline watcher.");
   await teleBot.start();
+
+  // await debugFirstStepLog();
 
   new Timer({
     name: "discover",

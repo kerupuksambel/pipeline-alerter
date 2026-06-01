@@ -1,4 +1,9 @@
-import { BitbucketPipeline, PipelineState, PipelineTarget } from "./types";
+import {
+  BitbucketPipeline,
+  PipelineState,
+  PipelineStep,
+  PipelineTarget,
+} from "./types";
 
 /** Normalize "what branch is this pipeline running on" across target types. */
 export function getBranchName(target: PipelineTarget): string | undefined {
@@ -24,3 +29,12 @@ export const isCompleted = (
 export const isFailed = (p: BitbucketPipeline): boolean =>
   isCompleted(p.state) &&
   (p.state.result.name === "FAILED" || p.state.result.name === "ERROR");
+
+/** A step in a terminal failure state (FAILED or ERROR). */
+export const isStepFailed = (step: PipelineStep): boolean =>
+  isCompleted(step.state) &&
+  (step.state.result.name === "FAILED" || step.state.result.name === "ERROR");
+
+/** All steps of a pipeline that ended in failure (FAILED or ERROR). */
+export const getFailedSteps = (steps: PipelineStep[]): PipelineStep[] =>
+  steps.filter(isStepFailed);

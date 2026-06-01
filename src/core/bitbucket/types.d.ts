@@ -97,7 +97,34 @@ export interface BitbucketPipeline {
   completed_on?: string; // ISO-8601 timestamp — present once the pipeline finishes
 }
 
+// ---------- Steps & logs ----------------------------------------------------
+// A pipeline's work is split into steps; each step has its own log output.
+// Endpoints:
+//   GET .../pipelines/{uuid}/steps/                  (list steps)
+//   GET .../pipelines/{uuid}/steps/{step_uuid}       (step detail)
+//   GET .../pipelines/{uuid}/steps/{step_uuid}/log   (raw log — text/plain)
+//
+// Fields kept (everything else dropped):
+//   - step identifier (uuid)
+//   - name
+//   - state (reuses the pipeline state union)
+//   - timing (started_on / completed_on)
+
+export interface PipelineStep {
+  uuid: string; // includes braces: "{uuid}"
+  name?: string; // step display name; absent for the default step
+  state: PipelineState;
+  started_on?: string; // ISO-8601 timestamp — present once the step starts
+  completed_on?: string; // ISO-8601 timestamp — present once the step finishes
+}
+
+// The log endpoint returns the raw build output as plain text, not JSON.
+export type PipelineStepLog = string;
+
 // ---------- Response types --------------------------------------------------
 
 export type ListPipelinesResponse = Paginated<BitbucketPipeline>;
 export type GetPipelineResponse = BitbucketPipeline;
+export type ListStepsResponse = Paginated<PipelineStep>;
+export type GetStepResponse = PipelineStep;
+export type GetStepLogResponse = PipelineStepLog;
