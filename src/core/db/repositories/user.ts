@@ -39,3 +39,18 @@ export const getSubscriber = async (
 export const listSubscribers = async (): Promise<SubscriberRow[]> => {
   return db.select().from(Subscriber);
 };
+
+/**
+ * Delete a subscriber by chatId. Returns the deleted row, or undefined
+ * if no subscriber existed for the given chatId.
+ */
+export const deleteSubscriber = async (
+  chatId: number,
+): Promise<SubscriberRow | undefined> => {
+  const [row] = await db
+    .delete(Subscriber)
+    .where(eq(Subscriber.chatId, chatId))
+    .returning();
+
+  return row;
+};
