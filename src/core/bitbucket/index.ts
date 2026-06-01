@@ -20,7 +20,7 @@ export const getPipelinesList = async () => {
   return response.data;
 };
 
-export const getPipelineDetail = async (id: UUID) => {
+export const getPipelineDetail = async (id: string) => {
   const response = await client.get<GetPipelineResponse>(
     `repositories/${config.BB_WORKSPACE}/${config.BB_REPO}/pipelines/${encodeURIComponent(id)}`,
   );
