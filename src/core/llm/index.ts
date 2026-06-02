@@ -2,6 +2,8 @@ import { config } from "@/config";
 import { PipelineStep, PipelineStepLog } from "../bitbucket/types";
 import { client } from "./bedrock";
 import { ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
+import { Log } from "@/utils/log";
+import { sanitizeTelegramHtml } from "@/utils/formatter";
 
 export const analyzePipelineLog = async (
   steps: PipelineStep[],
@@ -47,5 +49,8 @@ export const analyzePipelineLog = async (
     }),
   );
 
-  return response.output?.message?.content?.[0]?.text ?? "";
+  const responseText = response.output?.message?.content?.[0]?.text ?? "";
+  const sanitized = sanitizeTelegramHtml(responseText);
+  Log.debug(sanitized);
+  return sanitized;
 };
