@@ -73,7 +73,7 @@ const trackPipeline = (uuid: string): void => {
               ? `✅ Pipeline with ID: <b>${removeBrackets(uuid)}</b> sourced from branch <b>${getBranchName(detail.target)}</b> has been finished at ${detail.completed_on}`
               : `
                 🛑 Pipeline with ID: <b>${removeBrackets(uuid)}</b> sourced from branch <b>${getBranchName(detail.target)}</b> has been stopped at ${detail.completed_on} with the status ${nextResult}
-                ${nextResult === "FAILED" || nextResult === "ERROR" ? `\n\n🧠 Analyzing the failing steps...` : ""}
+                ${nextResult === "FAILED" || nextResult === "ERROR" ? `\n🧠 Analyzing the failing steps...` : ""}
                 `,
           );
 

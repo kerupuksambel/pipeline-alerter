@@ -1,9 +1,16 @@
 import { config } from "@/config";
 import { PipelineStep, PipelineStepLog } from "../bitbucket/types";
-import { client } from "./bedrock";
 import { ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
 import { Log } from "@/utils/log";
 import { sanitizeTelegramHtml } from "@/utils/formatter";
+
+// Pick the LLM client based on config.LLM_PROVIDER. We use dynamic import so the
+// unselected provider is never instantiated (e.g. the OpenAI constructor throws
+// when OPENAI_API_TOKEN is unset, which it is when running on Bedrock).
+const { client } =
+  config.LLM_PROVIDER === "openai"
+    ? await import("./openai")
+    : await import("./bedrock");
 
 export const analyzePipelineLog = async (
   steps: PipelineStep[],
@@ -33,23 +40,37 @@ export const analyzePipelineLog = async (
     3. Keep it below 2,000 characters (including the HTML tags)
   `;
 
-  const response = await client.send(
-    new ConverseCommand({
-      modelId: config.LLM_DEFAULT_MODEL,
-      messages: [
-        {
-          role: "user",
-          content: [{ text: prompt }],
-        },
-      ],
-      inferenceConfig: {
-        maxTokens: 1024,
-        temperature: 0.15,
-      },
-    }),
-  );
+  let responseText = "";
 
-  const responseText = response.output?.message?.content?.[0]?.text ?? "";
+  if ("chat" in client) {
+    const response = await client.chat.completions.create({
+      model: config.LLM_DEFAULT_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1024,
+      temperature: 0.15,
+    });
+
+    responseText = response.choices[0]?.message?.content ?? "";
+  } else {
+    const response = await client.send(
+      new ConverseCommand({
+        modelId: config.LLM_DEFAULT_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: [{ text: prompt }],
+          },
+        ],
+        inferenceConfig: {
+          maxTokens: 1024,
+          temperature: 0.15,
+        },
+      }),
+    );
+
+    responseText = response.output?.message?.content?.[0]?.text ?? "";
+  }
+
   const sanitized = sanitizeTelegramHtml(responseText);
   Log.debug(sanitized);
   return sanitized;
