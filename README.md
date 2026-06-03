@@ -1,6 +1,17 @@
 # bipalert
 A Bitbucket pipeline alerter with Telegram bot + failure analyzer with AI
 
+## Features
+- [ ] Alert
+  - [x] Alert on your Telegram bot whenever a pipeline is started, finished, or stopped
+  - [x] Supports on multiple subscribers
+  - [ ] Whitelist/blacklist user
+- [x] AI
+  - [x] AI recap on the failure cause + mitigation steps
+  - [x] Supports on Amazon Bedrock
+  - [x] Supports on OpenAI
+  - [x] Supports on custom OpenAI-style providers (e.g. OpenRouter)
+
 ## Prerequisites
 1. A Telegram bot token (use [BotFather](https://t.me/BotFather) to acquire this)
 2. A LLM token from provided API. `bipalert` supports Amazon Bedrock and OpenAI-style API
