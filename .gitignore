@@ -8,5 +8,5 @@ dist/
 !.env.example
 
 # Local DB
-database.db
+# database.db
 database.db*
