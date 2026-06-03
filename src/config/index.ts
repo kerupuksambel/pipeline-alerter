@@ -19,7 +19,7 @@ const schema = z
 
     // OpenAI
     OPENAI_API_TOKEN: z.string().optional(),
-    OPENAI_BASE_URL: z.string().optional(),
+    OPENAI_BASE_URL: z.string().default("https://api.openai.com/v1"),
 
     // Bedrock
     AWS_BEARER_TOKEN_BEDROCK: z.string().optional(),

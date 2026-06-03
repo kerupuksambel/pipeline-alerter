@@ -145,34 +145,12 @@ const discover = async (): Promise<void> => {
   }
 };
 
-/**
- * DEBUG: prints the first step's log of the first pipeline at startup, to
- * sanity-check the steps/logs fetch path. Fail-soft — never crashes startup.
- */
-const debugFirstStepLog = async (): Promise<void> => {
-  try {
-    const { values: pipelines } = await getPipelinesList();
-    const pipeline = pipelines[0];
-    if (!pipeline) return void Log.warning("[debug] no pipelines found");
-
-    const { values: steps } = await getPipelineSteps(pipeline.uuid);
-    const step = steps[0];
-    if (!step) return void Log.warning(`[debug] no steps for ${pipeline.uuid}`);
-
-    const log = await getPipelineStepLog(pipeline.uuid, step.uuid);
-    Log.debug(
-      `[debug] first step log of ${pipeline.uuid} / ${step.uuid}:\n${log}`,
-    );
-  } catch (err) {
-    Log.error(`[debug] failed to fetch first step log: ${err}`);
-  }
-};
-
 const main = async () => {
   Log.info("Starting pipeline watcher.");
   await teleBot.start();
 
   // await debugFirstStepLog();
+  //
 
   new Timer({
     name: "discover",

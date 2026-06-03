@@ -45,8 +45,6 @@ export const getPipelineStepLog = async (
   pipelineId: string,
   stepId: string,
 ) => {
-  // The log endpoint serves text/plain, so override the client's default
-  // `Accept: application/json` (which triggers a 406) and skip JSON parsing.
   const response = await client.get<GetStepLogResponse>(
     `repositories/${config.BB_WORKSPACE}/${config.BB_REPO}/pipelines/${encodeURIComponent(pipelineId)}/steps/${encodeURIComponent(stepId)}/log`,
     { responseType: "text", headers: { Accept: "text/plain, */*" } },
