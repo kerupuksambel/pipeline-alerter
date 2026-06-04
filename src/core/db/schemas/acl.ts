@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-type StatusState = "allow" | "deny";
+export type StatusState = "allow" | "deny";
 
 export const ACL = sqliteTable("acls", {
   userId: integer("user_id").primaryKey(),
