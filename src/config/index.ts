@@ -27,6 +27,9 @@ const schema = z
 
     // DB
     DB_FILENAME: z.string().default("database.db"),
+
+    // ACL
+    ACL_MODE: z.enum(["blacklist", "whitelist"]).default("blacklist"),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === "openai" && !env.OPENAI_API_TOKEN) {
