@@ -1,6 +1,8 @@
 import { addSubscriber, deleteSubscriber } from "@/core/db/repositories/user";
 import TelegramBot from "node-telegram-bot-api";
 import { Log } from "@/utils/log";
+import { onlyOwner } from "./middleware";
+import { upsertACL } from "../db/repositories/acl";
 
 export function registerHandlers(bot: TelegramBot): void {
   bot.onText(/\/start/, async (msg) => {
@@ -34,6 +36,32 @@ export function registerHandlers(bot: TelegramBot): void {
       );
     }
   });
+
+  bot.onText(
+    /\/acl allow (.+)/,
+    onlyOwner(bot, async (msg, match) => {
+      Log.info("ACL called");
+
+      const target = match?.[1];
+      const reason = match?.[2];
+
+      if (!target || !target.match(/([0-9]+)/)) {
+        bot.sendMessage(
+          msg.chat.id,
+          "User ID format invalid. Ensure the user ID is all numeric, integer value.",
+        );
+
+        return;
+      }
+
+      await upsertACL(Number(target), "allow", reason);
+
+      bot.sendMessage(
+        msg.chat.id,
+        `User ${target} has been added to whitelist.`,
+      );
+    }),
+  );
 
   bot.on("polling_error", (err) => {
     Log.error(`[TELEBOT] Polling error: ${err.message}`);

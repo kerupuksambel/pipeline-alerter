@@ -12,6 +12,7 @@ const schema = z
 
     // Telegram
     TELEGRAM_BOT_TOKEN: z.string().min(1, "TELEGRAM_BOT_TOKEN is required"),
+    TELEGRAM_BOT_OWNER: z.string().min(1, "TELEGRAM_BOT_OWNER is required"),
 
     // LLM
     LLM_PROVIDER: z.enum(["bedrock", "openai"]).default("bedrock"),

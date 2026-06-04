@@ -14,7 +14,7 @@ type StatusState = ACLRow["status"];
  * and updatedAt is bumped. Returns the resulting row.
  */
 export const upsertACL = async (
-  userId: string,
+  userId: number,
   status: StatusState,
   reason?: string,
 ): Promise<ACLRow> => {
@@ -38,7 +38,7 @@ export const upsertACL = async (
   return row!;
 };
 
-export const getACL = async (userId: string): Promise<ACLRow | undefined> => {
+export const getACL = async (userId: number): Promise<ACLRow | undefined> => {
   const [row] = await db
     .select()
     .from(ACL)
@@ -57,12 +57,9 @@ export const listACLs = async (): Promise<ACLRow[]> => {
  * user was not listed.
  */
 export const deleteACL = async (
-  userId: string,
+  userId: number,
 ): Promise<ACLRow | undefined> => {
-  const [row] = await db
-    .delete(ACL)
-    .where(eq(ACL.userId, userId))
-    .returning();
+  const [row] = await db.delete(ACL).where(eq(ACL.userId, userId)).returning();
 
   return row;
 };
@@ -75,7 +72,7 @@ export const deleteACL = async (
  * - blacklist: allow by default; denied only when explicitly listed with
  *   status "deny".
  */
-export const isAllowed = async (userId: string): Promise<boolean> => {
+export const isAllowed = async (userId: number): Promise<boolean> => {
   const entry = await getACL(userId);
 
   if (config.ACL_MODE === "whitelist") {
