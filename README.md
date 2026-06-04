@@ -2,15 +2,21 @@
 A Bitbucket pipeline alerter with Telegram bot + failure analyzer with AI
 
 ## Features
-- [ ] Alert
+- [x] Alert
   - [x] Alert on your Telegram bot whenever a pipeline is started, finished, or stopped
   - [x] Supports on multiple subscribers
-  - [ ] Whitelist/blacklist user
+  - [x] Whitelist/blacklist user
 - [x] AI
   - [x] AI recap on the failure cause + mitigation steps
   - [x] Supports on Amazon Bedrock
   - [x] Supports on OpenAI
   - [x] Supports on custom OpenAI-style providers (e.g. OpenRouter)
+
+## Usage
+- `/start` to start subscribing to the alert
+- `/stop` to stop subscribing to the alert
+- `/acl allow [ID]` to allow the Telegram user ID from subscribing the bot. **Only owner can access this.**
+- `/acl deny [ID]` to deny the Telegram user ID from subscribing the bot. **Only owner can access this.**
 
 ## Prerequisites
 1. A Telegram bot token (use [BotFather](https://t.me/BotFather) to acquire this)
@@ -32,6 +38,8 @@ BB_REPO=[Your Bitbucket repository name]
 
 # Telegram
 TELEGRAM_BOT_TOKEN=[Your Bot access token from BotFather that you acquired in (1)]
+TELEGRAM_BOT_OWNER=[Your Bot owner ID/username. If you use username, make sure you add "@" in front of the username]
+
 
 # LLM
 LLM_PROVIDER=[Your LLM provider, we support either "bedrock" or "openai"]
